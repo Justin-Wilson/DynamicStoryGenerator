@@ -31,6 +31,16 @@ def pronouns(text):
             pronouns[index] = word.lower()
     return pronouns
 
+def possessives(text):
+    words = word_tokenize(text)
+    tagged_words = nltk.pos_tag(words)
+    possessives = {}
+    for index, tagged_word in enumerate(tagged_words):
+        word, tag = tagged_word
+        if tag == "PRP$":
+            possessives[index] = word.lower()
+    return possessives
+
 def replace_values(document, new_proper_noun, new_pronouns):
     # Load the .docx file
     from docx import Document
@@ -46,6 +56,8 @@ def replace_values(document, new_proper_noun, new_pronouns):
     print("Proper Nouns Dict:", proper_nouns_dict)
     pronouns_dict = pronouns(text)
     print("Pronouns Dict:", pronouns_dict)
+    possessives_dict = possessives(text)
+    print("Possessive Dict:", possessives_dict)
 
     # Print the original text
     print("Original Text: \n", text)
@@ -60,12 +72,22 @@ def replace_values(document, new_proper_noun, new_pronouns):
         "they": "they"
     }
 
+    possessive_map = {
+        "his": "her",
+        "her": "his",
+        "they": "they",
+        "she": "he",
+        "their": "their"
+    }
+
     # Replace the proper nouns with the new values
     words = word_tokenize(text)
     for index in proper_nouns_dict:
         words[index] = new_proper_noun
     for index in pronouns_dict:
         words[index] = pronoun_map[pronouns_dict[index]]
+    for index in possessives_dict:
+        words[index] = possessive_map[possessives_dict[index]]
 
     # Print the new text
     new_text = " ".join(words)
